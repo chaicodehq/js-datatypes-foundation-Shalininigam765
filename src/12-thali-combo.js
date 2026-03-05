@@ -53,17 +53,88 @@
  *   // => "RAJASTHANI THALI (Veg) - Items: dal - Rs.250.00"
  */
 export function createThaliDescription(thali) {
-  // Your code here
+  if (typeof thali !== "object" || thali == null || typeof thali.name !== "string" || !Array.isArray(thali.items) || thali.items.length == 0 || !thali.price || typeof thali.isVeg !== "boolean"){
+    return "";
+  }
+
+  let type;
+  if (thali.isVeg == true){
+    type = "Veg";
+  }
+  else {
+    type = "Non-Veg";
+  }
+
+  let name = (thali.name).toUpperCase();
+  let items = (thali.items).join(", ");
+  let price = thali.price.toFixed(2);
+
+  return `${name} (${type}) - Items: ${items} - Rs.${price}`
 }
 
 export function getThaliStats(thalis) {
-  // Your code here
+  if (!Array.isArray(thalis) || thalis == null || thalis.length == 0){
+    return null;
+  }
+
+  const vegCount = thalis.filter(thali => thali.isVeg).length;
+  const nonVegCount = thalis.filter(thali => !thali.isVeg).length;
+  const totalThalis = vegCount + nonVegCount
+
+  const avgPrice = thalis.reduce((acc , thali)=>
+    acc += thali.price, 0)/thalis.length;
+
+  const maxPrice = Math.max(...thalis.map(thali => (thali.price)));
+  const minPrice = Math.min(...thalis.map(thali => thali.price));
+
+  const names = thalis.map(thali => thali.name);
+
+  return { totalThalis,
+           vegCount,
+           nonVegCount,
+           avgPrice: avgPrice.toFixed(2),
+           costliest:maxPrice, 
+           cheapest:minPrice ,
+           names }
 }
 
 export function searchThaliMenu(thalis, query) {
-  // Your code here
+  if (!Array.isArray(thalis) || typeof query != "string" || thalis.length == 0){
+    return []
+  }
+
+  let lowerQuery = query.toLowerCase();
+  
+  const matchThali = thalis.filter(thali => {
+
+    let name = thali.name.toLowerCase()
+    const nameMatch = name.includes(lowerQuery);
+
+    const itemMatch = thali.items.some(item =>item.toLowerCase().includes(lowerQuery) )
+    return nameMatch || itemMatch;
+  })
+
+  return matchThali;
 }
 
 export function generateThaliReceipt(customerName, thalis) {
-  // Your code here
+  if (typeof customerName != "string" || !Array.isArray(thalis) || thalis.length == 0){
+    return "";
+  }
+
+  const upperCase = customerName.toUpperCase();
+
+  const lineItems = thalis.map( thali => {
+    return (`- ${thali.name} x Rs.${thali.price}`)
+  }).join("\n")
+
+  const total = thalis.reduce((acc, thali) => {
+    acc += thali.price;
+    return acc;
+  }, 0)
+
+  const item = thalis.length;
+
+  return `THALI RECEIPT\n---\nCustomer: ${upperCase}\n${lineItems}\n---\nTotal: Rs.${total}\nItems: ${item}`
+  
 }
